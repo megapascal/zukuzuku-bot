@@ -392,7 +392,7 @@ def read_only(msg):
     bot.restrict_chat_member(
         msg.chat.id,
         msg.reply_to_message.from_user.id,
-        until_date=str(time.time() + ban_time))
+        until_date=str(msg.date + ban_time))
     bot.send_message(
         msg.chat.id,
         text.group_commands['ru']['users']['ro'].format(
