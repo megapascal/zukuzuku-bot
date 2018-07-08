@@ -32,9 +32,10 @@ user_messages = {
             'stickerpack_unbanned': 'Стикерпак <b>{stickerpack_name}</b> разблокирован.',
             'sticker_unban': 'Стикер <b>{sticker_id}</b> разблокирован.',
             'ro': '<a href="tg://user?id={admin_id}">{admin}</a> попросил <a href="tg://user?id={user_id}">{user} помолчать на {time_sec} сек.</a>',
-            'ping': 'Бот функционирует нормально. Серверное время: <code>{unix_time}</code>\n'
-                    'Бот отреагировал на сообщение за <code>{working_time}</code> сек.\n'
-                    'Бот не перезагружался уже <code>{uptime_sec}</code> сек.',
+            'ping': 'Бот функционирует нормально. \n'
+                    'Серверное время: <code>{unix_time}</code>\n'
+                    'Бот отреагировал на сообщение за <code>{working_time}</code>.\n'
+                    'Бот не перезагружался уже <code>{uptime_sec}</code>.',
             'ban': 'Пользователь <a href="tg://user?id={user_id}">{user}</a> забанен администратором <a href="tg://user?id={admin_id}">{admin}</a>. \nДля разбана используйте команду <code>/unban {user_id}</code>.',
             'unban': 'Пользователь <a href="tg://user?id={user_id}">{user}</a> разбанен администратором <a href="tg://user?id={admin_id}">{admin}</a>',
             'kick': 'Пользователь <a href="tg"//user?id={user_id}>{user}</a> исключен администратором <a href="tg://user?id={admin_id}">{admin}</a>',
@@ -176,16 +177,12 @@ group_commands = {
 
         'restricted': {
             'url': 'Удалена ссылка от <a href="tg://user?id={user_id}">{user_name}</a>, так как в чате ссылки разрешены только для администрации.',
-            'content': 'Сообщение от <a href="tg://user?id={user_id}">{user_name}</a> удалено, так как такой тип сообщений запрещен в чате.',
-            'bot': 'Бот исключен, так как в чате запрещены боты. Для того чтобы добавить его, несмотря на это ограчение, необходимо добавлять бота с правами администратора. Подойдут любые права, а сразу после приглашения их можно забрать.',
-            'global_ban': '<a href="tg://user?id={user_id}">{user_name}</a> исключен, т.к. находится в Глобальном Бане.\n'
-                          'Теперь, чтобы добавить его в чат есть лишь 3 варианта: \n'
-                          '1. Написать <a href="tg://user?id=303986717">мне</a> с подробной причиной, почему я должен разбанить этого человека (просто так в Глобальный Бан не попадают)\n'
-                          '2. Добавить пользователя сразу администратором\n'
-                          '3. Забрать права удаления пользователей у этого бота\n',
+            'content': 'Сообщение от <a href="tg://user?id={user_id}">{user_name}</a> удалено, так как такие тип сообщений запрещен в чате.',
+            'bot': 'Бот исключен, так как в чате запрещены боты.',
+            'global_ban': '<a href="tg://user?id={user_id}">{user_name}</a> исключен, т.к. находится в Глобальном Бане.\n',
             'new_user': {
                 'read_only': 'Пользователь <a href="tg://user?id={user_id}">{user_name}</a> ограничен на {ban_time} час.\n'
-                             'Для разблокировки нажмите на кнопку ниже',
+                             'Блокировка будет действовать до: {until_date}.',
                 'button_pressed': 'Нажата кнопка, <a href="tg://user?id={user_id}">{user_name}</a> разблокирован.'
             }
         },
@@ -197,12 +194,13 @@ group_commands = {
                     'Кол-во предупреждений: <b>{current_warns}</b>.\n'
                     'Максимальное количество предупреждений, после которых пользователь исключается из группы: <b>{max_warns}</b>.',
             'kick': 'Пользователь <a href="tg://user?id={user_id}">{user_name}</a> исключен администратором <a href="tg://user?id={admin_id}">{admin_name}</a>.',
-            'ro': '<a href="tg://user?id={admin_id}">{admin_name}</a> попросил <a href="tg://user?id={user_id}">{user_name}</a> помолчать на <code>{time_sec}</code> сек.',
+            'ro': '<a href="tg://user?id={admin_id}">{admin_name}</a> попросил <a href="tg://user?id={user_id}">{user_name}</a> помолчать на <code>{time_sec}</code>.\n'
+                  'Блокировка будет действовать до: {until_date}.',
             'banned': 'Пользователь <a href="tg://user?id={user_id}">{user_name}</a> заблокирован администратором <a href="tg://user?id={admin_id}">{admin_name}</a>.\n'
                       'Для разблокировки введите команду <code>/unban {user_id}</code>',
             'unbanned': 'Пользователь <a href="tg://user?id={user_id}">{user_name}</a> разблокирован администратором <a href="tg://user?id={admin_id}">{admin_name}</a>.',
             'kicked_warns': 'Пользователь <a href="tg://user?id={user_id}">{user_name}</a> исключен за превышение допустимого числа предупреждений: <b>{count_warns}</b>',
-            'ro_warns': 'ПольПользователь <a href="tg://user?id={user_id}">{user_name}</a> лишен права писать за превышение допустимого числа предупреждений: <b>{count_warns}</b>',
+            'ro_warns': 'Пользователь <a href="tg://user?id={user_id}">{user_name}</a> лишен права писать за превышение допустимого числа предупреждений: <b>{count_warns}</b>',
         },
 
         'donate': 'Ого, кто-то сюда зашел..\n'

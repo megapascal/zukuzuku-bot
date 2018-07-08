@@ -1,5 +1,6 @@
 # coding: utf8
 
+import datetime
 import hashlib
 import logging
 import random
@@ -98,7 +99,7 @@ def is_user_new(msg):
     return r
 
 def check_super_user(user_id):
-    if user_id in [303986717, 207737178]:
+    if user_id in config.super_admins:
         return True
     else:
         return False
@@ -389,10 +390,17 @@ def read_only(msg):
         ban_time = parse_time(parse_arg(msg)[1])
     else:
         ban_time = 60
+    untildate = msg.date + ban_time
     bot.restrict_chat_member(
         msg.chat.id,
         msg.reply_to_message.from_user.id,
-        until_date=str(msg.date + ban_time))
+        until_date = untildate
+    )
+    ban_datetime = datetime.timedelta(seconds = ban_time)
+    ban_time_str = str(ban_datetime).replace('day', 'days').replace('dayss', 'days')
+    if ban_datetime.days != 0:
+        ban_time_str = ban_time_str.replace(ban_time_str.split(',')[0], get_text_translation(str(ban_datetime).split(',')[0], 'ru'))
+    until_date_human = get_text_translation(datetime.datetime.fromtimestamp(untildate).strftime('%A, %d %B %Y, %H:%M'), 'ru')
     bot.send_message(
         msg.chat.id,
         text.group_commands['ru']['users']['ro'].format(
@@ -400,10 +408,12 @@ def read_only(msg):
             admin_name = api.replacer(msg.from_user.first_name),
             user_id = msg.reply_to_message.from_user.id,
             user_name = api.replacer(msg.reply_to_message.from_user.first_name),
-            time_sec = ban_time
+            time_sec = ban_time_str,
+            until_date = until_date_human
         ),
         parse_mode='HTML',
-        disable_web_page_preview=True)
+        disable_web_page_preview=True
+    )
 
 def parse_time(arg):
     amount = int(arg[:len(arg)-1:1])
@@ -553,7 +563,8 @@ def set_voteban_votes_count(vote_hash, votes_count):
 
 def new_update(msg, end_time):
     try:
-        api.new_update(msg, end_time)
+        #api.new_update(msg, end_time)
+        pass
     except Exception as e:
         logging.error(e)
 
@@ -745,6 +756,43 @@ def get_my_ip():
     url = 'http://ipinfo.io/ip'
     s = str(requests.get(url = url).content)[2:-3:]
     return s
+
+def get_text_translation(txt, end_lang):
+    res = search_in_cache(txt, end_lang)
+    if not res['result']:
+        proxies = {
+            'https': 'https://66.70.255.195:3128'
+        }
+        while True:
+            params = {
+                'key': random.choice(secret_config.yandex_translate_tokens),
+                'text': txt,
+                'lang': 'en-%s' % end_lang
+            }
+            r = requests.get(url = 'https://translate.yandex.net/api/v1.5/tr.json/translate', params = params, proxies = proxies).json()
+            if r['code'] == 200:
+                add_to_cache(txt, r['text'][0], end_lang)
+                return r['text'][0]
+            else:
+                print(e)
+                # logging.error(r)
+    else:
+        return res['text']
+
+def search_in_cache(txt, end_lang):
+    res = {
+        'result': False,
+        'text': ''
+    }
+    try:
+        res['text'] = config.translations[end_lang][txt]
+        res['result'] = True
+    except Exception:
+        pass
+    return res
+    
+def add_to_cache(source, txt, end_lang):
+    config.translations[end_lang][source] = txt
 
 ############################################################
 ############################################################

@@ -5,6 +5,7 @@ import logging
 import random
 import re
 import ssl
+import subprocess
 import threading
 import time
 from threading import Timer
@@ -335,12 +336,20 @@ def bot_lang(msg):
 @bot.message_handler(commands=['ping'])
 def bot_ping(msg):
     start_timee = time.time()
+    uptime = datetime.timedelta(seconds = int(time.time()-start_time))
+    working_time = datetime.timedelta(seconds = int(time.time()-msg.date))
+    uptime_str = str(uptime).replace('day', 'days').replace('dayss', 'days')
+    working_time_str = str(working_time).replace('day', 'days').replace('dayss', 'days')
+    if uptime.days != 0:
+        uptime_str = uptime_str.replace(uptime_str.split(',')[0], utils.get_text_translation(uptime_str.split(',')[0]), 'ru')
+    if working_time.days != 0:
+        working_time_str = working_time_str.replace(working_time_str.split(',')[0], utils.get_text_translation(working_time_str.split(',')[0], 'ru'))
     bot.send_message(
         msg.chat.id,
         text.user_messages['ru']['commands']['ping'].format(
-            unix_time = datetime.datetime.time(datetime.datetime.now()),
-            working_time = round((time.time()-msg.date), 3),
-            uptime_sec = int(time.time()-start_time)
+            unix_time = datetime.datetime.fromtimestamp(int(time.time())),
+            working_time = working_time_str,
+            uptime_sec = uptime
         ),
         reply_to_message_id=msg.message_id,
         parse_mode='HTML'
@@ -542,7 +551,7 @@ def bot_sticker_unban(msg):
     if utils.have_args(msg) and utils.check_status(msg):
         sticker_id = utils.parse_arg(msg)[1]
         utils.unban_sticker(msg, sticker_id)
-    elif check_status(msg) and not utils.have_args(msg):
+    elif utils.check_status(msg) and not utils.have_args(msg):
         utils.not_enought_rights(msg)
     elif utils.have_args(msg) and not check_status(msg):
         utils.no_args(msg)
@@ -720,6 +729,12 @@ def bot_reset_settings(msg):
         )
         
 
+@bot.message_handler(commands = ['update_time'], func = lambda msg: utils.check_super_user(msg.from_user.id))
+def bot_update_time(msg):
+    bot_ping(msg)
+    subprocess.run("timedatectl set-time '{time}'".format(time = datetime.datetime.fromtimestamp(msg.date+1).strftime("%Y-%m-%d %H:%M:%S")), shell=True)
+    bot_ping(msg)
+
 @bot.message_handler(content_types=['text'], func = lambda msg: msg.chat.type != 'private')
 def bot_check_text(msg):
     start_time = time.time()
@@ -783,6 +798,8 @@ def testt(msg):
             msg.message_id
         )
     utils.new_update(msg, time.time()-start_time)
+
+
 
 # Кнопки
 

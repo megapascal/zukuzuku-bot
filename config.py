@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import ujson
-
 restricted_characters = [
     '<',
     '>',
@@ -134,4 +132,14 @@ settings_states = {
 
 available_commands = [
     '/'
+]
+
+translations = {
+    'ru': {},
+    'uz': {}
+}
+
+super_admins = [
+    303986717, 
+    207737178
 ]
