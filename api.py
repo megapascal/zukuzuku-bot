@@ -3,7 +3,7 @@
 import hashlib
 import logging
 import time
-
+import cache_worker
 import pymysql
 import pymysql.cursors
 import requests
@@ -273,28 +273,36 @@ def set_user_param(user_id, column, state):
         cursor.execute(sql, (state, user_id))
         conn.commit()
 
-def get_group_params(chat_id):
-    with DataConn(db) as conn:
-        cursor = conn.cursor()
-        sql = 'SELECT * FROM `chats` WHERE `chat_id` = %s'
-        cursor.execute(sql, (chat_id, ))
-        res = cursor.fetchone()
-        try:
-            ujson.loads(res['settings'])['get_notifications']
-            return ujson.loads(res['settings'])
-        except Exception as e:
-            register_new_chat(bot.get_chat(chat_id))
-            change_group_params(chat_id, ujson.dumps(config.default_group_settings))
-            bot.send_message(
-                chat_id,
-                text.group_commands['ru']['errors']['db_error']['got_error']
-            )
-            bot.send_message(   
-                chat_id,
-                text.group_commands['ru']['errors']['db_error']['finshed']
-            )
-            return ujson.loads(res['settings'])['get_notifications']
+def search_in_cache(storage, key1=None, key2=None, key3=None):
+    pass
 
+def get_group_params(chat_id):
+    res = cache_worker.group_info_search_in_cache(chat_id)
+    if not res['result']:
+        with DataConn(db) as conn:
+            cursor = conn.cursor()
+            sql = 'SELECT * FROM `chats` WHERE `chat_id` = %s'
+            cursor.execute(sql, (chat_id, ))
+            res = cursor.fetchone()
+            try:
+                ujson.loads(res['settings'])['get_notifications']
+                cache_worker.group_info_update_cache(chat_id, res['settings'])
+                return ujson.loads(res['settings'])
+            except Exception as e:
+                register_new_chat(bot.get_chat(chat_id))
+                change_group_params(chat_id, ujson.dumps(config.default_group_settings))
+                bot.send_message(
+                    chat_id,
+                    text.group_commands['ru']['errors']['db_error']['got_error']
+                )
+                bot.send_message(   
+                    chat_id,
+                    text.group_commands['ru']['errors']['db_error']['finshed']
+                )
+                return ujson.loads(res['settings'])['get_notifications']
+    else:
+        return ujson.loads(res['text'])
+        
 def change_group_params(chat_id, new_params):
     with DataConn(db) as conn:
         cursor = conn.cursor()
@@ -302,6 +310,7 @@ def change_group_params(chat_id, new_params):
         try:
             cursor.execute(sql, (new_params, chat_id))
             conn.commit()
+            cache_worker.group_info_update_cache(chat_id, new_params)
         except Exception as e:
             print(e)
             print(sql)

@@ -134,11 +134,6 @@ available_commands = [
     '/'
 ]
 
-translations = {
-    'ru': {},
-    'uz': {}
-}
-
 super_admins = [
     303986717, 
     207737178

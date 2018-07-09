@@ -7,13 +7,14 @@ import random
 import re
 import time
 from hashlib import md5
-
+import cache_worker
 import pymysql
 import requests
 import telebot
 from telebot import types
 
 import api
+import cache_file
 import config
 import secret_config
 import text
@@ -297,48 +298,40 @@ def set_rules(msg, rules):
 #                        #
 ############################################################
 
-def check_status(msg):
+def check_status(user_id, chat_id):
     res = False
     try:
-        admins = bot.get_chat_administrators(msg.chat.id)
-        for i in admins:
-            if i.user.id == msg.from_user.id:
-                res = True
-        if msg.from_user.id == 303986717:
+        if user_id == 303986717:
             res = True
+        admins = bot.get_chat_administrators(chat_id)
+        for i in admins:
+            if i.user.id == user_id:
+                res = True
     except Exception as e:
         logging.error(e)
     return res
-
-def check_status_button(c):
-    chat_id = parse_chat_id(c)
-    user_id = c.from_user.id
-    res = False
-    admins = bot.get_chat_administrators(chat_id)
-    for i in admins:
-        if i.user.id == user_id:
-            res = True
-    if user_id == 303986717:
-        res = True
-    return res
     
 def ban_user(msg):
-    if check_status(msg):
+    if check_status(msg.from_user.id, msg.chat.id):
         kb = types.InlineKeyboardMarkup()
-        btn = types.InlineKeyboardButton(text = 'Разбанить', callback_data='unban {user_id} {chat_id}'.format(
-            user_id = msg.reply_to_message.from_user.id,
-            chat_id = msg.chat.id
-            ))
+        btn = types.InlineKeyboardButton(
+            text = 'Разбанить', 
+            callback_data='unban::{user_id}'.format(
+                user_id = msg.reply_to_message.from_user.id,
+            )
+        )
         kb.add(btn)
         bot.kick_chat_member(
             msg.chat.id,
             msg.reply_to_message.from_user.id,
             until_date = str(time.time() + 31708800))
-        bot.reply_to(msg, text.group_commands[get_group_lang(msg)]['users']['banned'].format(
-            user_name = api.replacer(msg.reply_to_message.from_user.first_name),
-            user_id = msg.reply_to_message.from_user.id,
-            admin_name = api.replacer(msg.from_user.first_name),
-            admin_id = msg.from_user.id
+        bot.reply_to(
+            msg, 
+            text.group_commands[get_group_lang(msg)]['users']['banned'].format(
+                user_name = api.replacer(msg.reply_to_message.from_user.first_name),
+                user_id = msg.reply_to_message.from_user.id,
+                admin_name = api.replacer(msg.from_user.first_name),
+                admin_id = msg.from_user.id
             ),
             reply_markup = kb,
             parse_mode = 'HTML'
@@ -347,7 +340,7 @@ def ban_user(msg):
         not_enought_rights(msg)
 
 def kick_user(msg):
-    if check_status(msg):
+    if check_status(msg.from_user.id, msg.chat.id):
         if msg.reply_to_message:
             bot.kick_chat_member(
                 msg.chat.id,
@@ -355,11 +348,13 @@ def kick_user(msg):
                 until_date = str(time.time() + 31)
             )
             bot.unban_chat_member(msg.chat.id, msg.reply_to_message.from_user.id)
-            bot.reply_to(msg, text.group_commands[get_group_lang(msg)]['users']['kick'].format(
-                user_name = api.replacer(msg.reply_to_message.from_user.first_name),
-                user_id = msg.reply_to_message.from_user.id,
-                admin_name = api.replacer(msg.from_user.first_name),
-                admin_id = msg.from_user.id
+            bot.reply_to(
+                msg, 
+                text.group_commands[get_group_lang(msg)]['users']['kick'].format(
+                    user_name = api.replacer(msg.reply_to_message.from_user.first_name),
+                    user_id = msg.reply_to_message.from_user.id,
+                    admin_name = api.replacer(msg.from_user.first_name),
+                    admin_id = msg.from_user.id
                 ),
                 parse_mode = 'HTML'
             )
@@ -374,11 +369,13 @@ def kick_user(msg):
                 until_date = str(time.time() + 31)
             )
             bot.unban_chat_member(msg.chat.id, usr.user.id)
-            bot.reply_to(msg, text.group_commands[get_group_lang(msg)]['users']['kick'].format(
-                user_name = api.replacer(usr.user.first_name),
-                user_id = usr.user.id,
-                admin_name = api.replacer(msg.from_user.first_name),
-                admin_id = msg.from_user.id
+            bot.reply_to(
+                msg, 
+                text.group_commands[get_group_lang(msg)]['users']['kick'].format(
+                    user_name = api.replacer(usr.user.first_name),
+                    user_id = usr.user.id,
+                    admin_name = api.replacer(msg.from_user.first_name),
+                    admin_id = msg.from_user.id
                 ),
                 parse_mode = 'HTML'
             )
@@ -758,7 +755,7 @@ def get_my_ip():
     return s
 
 def get_text_translation(txt, end_lang):
-    res = search_in_cache(txt, end_lang)
+    res = cache_worker.translation_search_in_cache(txt, end_lang)
     if not res['result']:
         proxies = {
             'https': 'https://66.70.255.195:3128'
@@ -771,7 +768,7 @@ def get_text_translation(txt, end_lang):
             }
             r = requests.get(url = 'https://translate.yandex.net/api/v1.5/tr.json/translate', params = params, proxies = proxies).json()
             if r['code'] == 200:
-                add_to_cache(txt, r['text'][0], end_lang)
+                cache_worker.translation_add_to_cache(txt, r['text'][0], end_lang)
                 return r['text'][0]
             else:
                 print(e)
@@ -779,20 +776,7 @@ def get_text_translation(txt, end_lang):
     else:
         return res['text']
 
-def search_in_cache(txt, end_lang):
-    res = {
-        'result': False,
-        'text': ''
-    }
-    try:
-        res['text'] = config.translations[end_lang][txt]
-        res['result'] = True
-    except Exception:
-        pass
-    return res
-    
-def add_to_cache(source, txt, end_lang):
-    config.translations[end_lang][source] = txt
+
 
 ############################################################
 ############################################################

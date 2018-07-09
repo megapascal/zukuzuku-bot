@@ -75,7 +75,7 @@ user_messages = {
                 'Thanks to @Obzorchick for info support\n'
                 'P.S. If you found any mistakes, please, contact [Forden](tg://user?id=303986717)',
     },
-	    'ukr': {
+        'ukr': {
         'chosen_language': 'Слава Україні! Ти обрав українську мову. Щоб змінити його - напиши команду /language. Тепер ще раз напиши /start, щоб отримати доступ до бота',
 
         'start': 'Привіт! Я твій новий помічник в чаті! Щоб використовувати мене на максимум, додай мене в підконтрольну тобі группу, видай всі привилегії, а сюди напиши /help',
@@ -231,7 +231,7 @@ group_commands = {
         }
     },
     'en': {},
-	'ukr': {
+    'ukr': {
         'ban_me_please': 'Ну, <a href="tg://user?id={user_id}">{user_name}</a>, ти сам цього захотів. Ти виграв {t} мін. рід-онлі. Вітаємо✨✨\n'
                          'Для розблокування попроси будь-якого адміністратора написати команду<code>/unban {user_id}</code>',
         'errors':{
@@ -314,11 +314,19 @@ service_messages = {
 }
 
 promotion_message = '<b>Лучший бот для администраторов групп - </b>t.me/zukuzukubot'
-
+    
 reports_messages = {
     'report': {
-       'to_admin': 'Вас вызвали в группе <b>{group_name}</b>, прошу обратить внимание.'
-                   'Отправитель - <a href="tg://user?id={user_id}">{user_name}</a>.',
+       'to_admin': { 
+                'no_username': 'Вас вызвали в группе <b>{group_name}</b>, прошу обратить внимание.\n'
+                               'Отправитель - <a href="tg://user?id={user_id}">{user_name}</a>.',
+                'have_username': {
+                    'reply': 'Вас вызвали в группе <a href="t.me/{group_username}/{message_id}">{group_name}</a>, прошу обратить внимание.\n'
+                             'Отправитель - <a href="tg://user?id={user_id}">{user_name}</a>.',
+                    'no_reply': 'Вас вызвали в группе <a href="t.me/{group_username}">{group_name}</a>, прошу обратить внимание.\n'
+                             'Отправитель - <a href="tg://user?id={user_id}">{user_name}</a>.',
+                }
+        },
        'to_user': 'Спасибо, мы обработаем ваше обращение.\n' 
                   '<b>Учтите, что спам данной командой часто влечет за собой наказание со стороны администрации чата.</b>'
     }
