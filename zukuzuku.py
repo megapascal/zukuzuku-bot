@@ -77,8 +77,8 @@ app.router.add_post('/{token}/', handle)
 def create_user_language_keyboard():
     lang_keyboard = types.InlineKeyboardMarkup()
     languages = [['Русский', 'English', 'O\'zbek', 'Українська'], ['ru_lang', 'en_lang', 'uz_lang', 'ukr_lang']]
-    for lang in range(len(languages)):
-        lang_keyboard.add(types.InlineKeyboardButton(text=langs[0][lang], callback_data=langs[1][lang]))
+    for lang in range(len(languages[0])):
+        lang_keyboard.add(types.InlineKeyboardButton(text=languages[0][lang], callback_data=languages[1][lang]))
     return lang_keyboard
 
 
